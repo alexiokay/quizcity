@@ -148,7 +148,7 @@ class QuizDetailSerializer(serializers.ModelSerializer):
 
     def get_image(self, obj):
         url = str(obj.image.url)
-        return "https://www.quizcity.net" + url
+        return url
 
     def get_quiztakers_set(self, obj):
         try:
