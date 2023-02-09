@@ -60,7 +60,7 @@ class QuizListSerializer(serializers.ModelSerializer):
 
     def get_image(self, obj):
         url = str(obj.image.url)
-        return "https://www.quizcity.net" + url
+        return  url
 
     def get_random_questions(self, obj):
         questions = obj.get_random_question(5)

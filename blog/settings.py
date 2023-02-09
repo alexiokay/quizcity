@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'quizes',
 
     'channels',
+    'storages',
 
 ]
 
@@ -173,12 +174,7 @@ STATICFILES_DIRS = [
 
 
 
-STATIC_URL = 'static/'
-MEDIA_URL = 'media/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media_cdn')
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 #STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
 # Default primary key field type
@@ -292,9 +288,9 @@ else :
 
 #Dev :
 if DEBUG == True:
-    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"; DEFAULT_HTTP_PROTOCOL = "http"; SESSION_COOKIE_SECURE = False; CSRF_COOKIE_SECURE = False; SECURE_SSL_REDIRECT = False; DEBUG = True; ALLOWED_HOSTS = ['10.10.10.23', 'www.quizcity.net', 'localhost'] 
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "http"; DEFAULT_HTTP_PROTOCOL = "http"; SESSION_COOKIE_SECURE = False; CSRF_COOKIE_SECURE = False; SECURE_SSL_REDIRECT = False; DEBUG = True; ALLOWED_HOSTS = ['127.0.0.1', 'www.quizcity.net', 'localhost', 'www.localhost'] 
 else:
-    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"; DEFAULT_HTTP_PROTOCOL = "https"; SESSION_COOKIE_SECURE = True ; CSRF_COOKIE_SECURE = True ; os.environ['HTTPS'] = "on"; SECURE_HSTS_SECONDS = 31536000; SECURE_HSTS_PRELOAD = True; SECURE_HSTS_INCLUDE_SUBDOMAINS = True; DEBUG = True; ALLOWED_HOSTS = ['quizcity2.herokuapp.com', 'www.quizcity.net', '10.10.10.23:8002']; SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https"); CORS_ALLOW_CREDENTIALS = True; PREPEND_WWW = True; BASE_URL = "https://www.quizcity.net"; CORS_ORIGIN_ALLOW_ALL = True; CSRF_TRUSTED_ORIGINS = ['https://www.quizcity.net', 'http://10.10.10.23:8002']; CORS_ORIGIN_WHITELIST = ('https://www.quizcity.net', 'http://10.10.10.23:8002',); DEBUG_PROPAGATE_EXCEPTIONS = True; WHITENOISE_USE_FINDERS = True; WHITENOISE_MANIFEST_STRICT = False; WHITENOISE_ALLOW_ALL_ORIGINS = True
+    ACCOUNT_DEFAULT_HTTP_PROTOCOL = "https"; DEFAULT_HTTP_PROTOCOL = "https"; SESSION_COOKIE_SECURE = True ; CSRF_COOKIE_SECURE = True ; os.environ['HTTPS'] = "on"; SECURE_HSTS_SECONDS = 31536000; SECURE_HSTS_PRELOAD = True; SECURE_HSTS_INCLUDE_SUBDOMAINS = True; DEBUG = True; ALLOWED_HOSTS = ['quizcity2.herokuapp.com', 'www.quizcity.net', '10.10.10.23:8002']; SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https"); CORS_ALLOW_CREDENTIALS = True; PREPEND_WWW = True; BASE_URL = "https://www.quizcity.net"; CORS_ORIGIN_ALLOW_ALL = True; CSRF_TRUSTED_ORIGINS = ['https://www.quizcity.net', 'http://10.10.10.23:8002', 'http://127.0.0.1:8002']; CORS_ORIGIN_WHITELIST = ('https://www.quizcity.net', 'http://10.10.10.23:8002', 'http://127.0.0.1:8002'); DEBUG_PROPAGATE_EXCEPTIONS = True; WHITENOISE_USE_FINDERS = True; WHITENOISE_MANIFEST_STRICT = False; WHITENOISE_ALLOW_ALL_ORIGINS = True
 
 #CORS_REPLACE_HTTPS_REFERER = False
 #SECURE_SSL_REDIRECT = True
@@ -322,3 +318,44 @@ CACHES = {
         'LOCATION': 'my_cache_table',
     }
 }
+
+
+
+
+#*Storages
+USE_S3 = config("USE_S3")
+print(USE_S3)
+
+
+if USE_S3:
+    # aws settings
+    AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = config("AWS_SECRET_ACCESS_KEY")
+    AWS_STORAGE_BUCKET_NAME = config("AWS_STORAGE_BUCKET_NAME")
+    AWS_DEFAULT_ACL = config("AWS_DEFAULT_ACL")
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+    AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "max-age=86400"}
+    # s3 static settings
+    AWS_LOCATION = "static"
+    STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_LOCATION}/"
+    STATICFILES_STORAGE = "blog.storage_backends.StaticStorage"
+    # s3 public media settings
+    PUBLIC_MEDIA_LOCATION = "media"
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{PUBLIC_MEDIA_LOCATION}/"
+    DEFAULT_FILE_STORAGE = "blog.storage_backends.PublicMediaStorage"
+    # s3 private media settings
+    PRIVATE_MEDIA_LOCATION = "private"
+    PRIVATE_FILE_STORAGE = "blog.storage_backends.PrivateMediaStorage"
+else:
+    STATIC_URL = 'static/'
+    MEDIA_URL = 'media/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media_cdn')
+
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'media'),
+    os.path.join(BASE_DIR, 'assets'),
+]
