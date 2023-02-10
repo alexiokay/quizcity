@@ -6,21 +6,23 @@ from django.forms import TextInput, Textarea
 from django.contrib.admin.widgets import FilteredSelectMultiple
 from django import forms
 from django.utils.translation import gettext_lazy as _
+from nested_admin import NestedModelAdmin, NestedTabularInline
 # Register your models here.
 #admin.site.register(Quiz)
 
-class AnswerInline(admin.TabularInline):
+class AnswerInline(NestedTabularInline):
     model = Answer
-    extra = 1
+    extra = 0
 
 
-class QuestionInline(admin.TabularInline):
+class QuestionInline(NestedTabularInline):
+    
     model = Question
-    extra = 1
+    extra = 0
     formfield_overrides = {
-        models.CharField: {'widget': TextInput(attrs={'size':'20'})},
-        models.TextField: {'widget': Textarea(attrs={'rows':4, 'cols':10})},
+        models.TextField: {'widget': Textarea(attrs={'rows':3, 'cols':50})},
     }
+
     
     inlines = [AnswerInline,]
 
@@ -31,9 +33,9 @@ class QuestionAdmin(admin.ModelAdmin):
     inlines = [AnswerInline,]
 
     
-class QuizAdmin(admin.ModelAdmin):
+class QuizAdmin(NestedModelAdmin):
     model = Quiz
-
+    
     list_display = ('title', 'category' )
     list_filter = ('category',)
     search_fields = ('description', 'category', )

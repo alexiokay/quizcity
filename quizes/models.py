@@ -87,6 +87,7 @@ class Quiz(models.Model):
 
 
 class Question(models.Model):
+    id = models.AutoField(primary_key=True)
     created_at = models.DateTimeField(auto_now_add=True)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     text = models.CharField(max_length=100)
